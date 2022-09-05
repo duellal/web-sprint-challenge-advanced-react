@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import axios from 'axios'
 
 
@@ -10,7 +10,7 @@ const initialState = {
   steps: 0,
   message: '',
   email: '',
-  matrix: [[null, null, null], [null, "B", null], [null, null, null]]
+  matrix: [[null, null, null], [null, 'B', null], [null, null, null]]
 }
 
 const url = 'http://localhost:9000/api/result'
@@ -29,10 +29,6 @@ export default function AppFunctional(props) {
     // returns the fully constructed string.
   }
 
-  function reset() {
-    // Use this helper to reset all states to their initial values.
-  }
-
   function getNextIndex(direction) {
     // This helper takes a direction ("left", "up", etc) and calculates what the next index
     // of the "B" would be. If the move is impossible because we are at the edge of the grid,
@@ -40,9 +36,96 @@ export default function AppFunctional(props) {
 
   }
 
-  function move(evt) {
-    // This event handler can use the helper above to obtain a new index for the "B",
-    // and change any states accordingly.
+  const moveLeft = () => {
+    if (state.x === 1) {
+      setState({
+        ...state,
+        message: "You can't go left"
+      })
+    }
+    else {
+      const newMatrix = [...state.matrix]
+      newMatrix[state.y - 1][state.x - 1] = null;
+      newMatrix[state.y - 1][state.x - 2] = 'B'
+
+      setState({
+        ...state,
+        x: state.x - 1,
+        index: state.index - 1,
+        steps: state.steps + 1,
+        matrix: newMatrix
+      })
+    }
+  }
+
+  const moveUp = () => {
+    if (state.y === 1) {
+      setState({
+        ...state,
+        message: "You can't go up"
+      })
+    }
+    else {
+      const newMatrix = [...state.matrix]
+      newMatrix[state.y - 1][state.x - 1] = null;
+      newMatrix[state.y - 2][state.x - 1] = 'B'
+
+      setState({
+        ...state,
+        y: state.y - 1,
+        index: state.index - 3,
+        steps: state.steps + 1,
+        matrix: newMatrix
+      })
+    }
+  }
+
+  const moveRight = () => {
+    if (state.x === 3) {
+      setState({
+        ...state,
+        message: "You can't go right"
+      })
+    }
+    else {
+      const newMatrix = [...state.matrix]
+      newMatrix[state.y - 1][state.x - 1] = null;
+      newMatrix[state.y - 1][state.x] = 'B'
+
+      setState({
+        ...state,
+        x: state.x + 1,
+        index: state.index + 1,
+        steps: state.steps + 1,
+        matrix: newMatrix
+      })
+    }
+  }
+
+  const moveDown = () => {
+    if (state.y === 3) {
+      setState({
+        ...state,
+        message: "You can't go down"
+      })
+    }
+    else {
+      const newMatrix = [...state.matrix]
+      newMatrix[state.y - 1][state.x - 1] = null;
+      newMatrix[state.y][state.x - 1] = 'B'
+
+      setState({
+        ...state,
+        y: state.y + 1,
+        index: state.index + 3,
+        steps: state.steps + 1,
+        matrix: newMatrix
+      })
+    }
+  }
+
+  const handleReset = () => {
+    setState(initialState)
   }
 
   const postRequest = () => {
@@ -85,14 +168,14 @@ export default function AppFunctional(props) {
   return (
     <div id="wrapper" className={props.className}>
       <div className="info">
-        <h3 id="coordinates">Coordinates (2, 2)</h3>
-        <h3 id="steps">You moved 0 times</h3>
+        <h3 id="coordinates">Coordinates ({state.x}, {state.y})</h3>
+        <h3 id="steps">You moved {state.steps} times</h3>
       </div>
       <div id="grid">
         {
           [0, 1, 2, 3, 4, 5, 6, 7, 8].map(idx => (
-            <div key={idx} className={`square${idx === 4 ? ' active' : ''}`}>
-              {idx === 4 ? 'B' : null}
+            <div key={idx} className={`square${idx === state.index ? ' active' : ''}`}>
+              {idx === state.index ? 'B' : null}
             </div>
           ))
         }
@@ -101,11 +184,11 @@ export default function AppFunctional(props) {
         <h3 id="message">{state.message}</h3>
       </div>
       <div id="keypad">
-        <button id="left">LEFT</button>
-        <button id="up">UP</button>
-        <button id="right">RIGHT</button>
-        <button id="down">DOWN</button>
-        <button id="reset">reset</button>
+        <button id="left" onClick={moveLeft}>LEFT</button>
+        <button id="up" onClick={moveUp}>UP</button>
+        <button id="right" onClick={moveRight}>RIGHT</button>
+        <button id="down" onClick={moveDown}>DOWN</button>
+        <button id="reset" onClick={handleReset}>reset</button>
       </div>
       <form onSubmit={onSubmit}>
         <input id="email"
