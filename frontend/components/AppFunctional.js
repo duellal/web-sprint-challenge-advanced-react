@@ -30,13 +30,9 @@ export default function AppFunctional(props) {
       .post(url, newRequest)
       .then(res => {
         setState({
+          ...state,
           message: res.data.message,
-          index: 4,
-          x: 2,
-          y: 2,
-          steps: 0,
           email: '',
-          matrix: [[null, null, null], [null, 'B', null], [null, null, null]]
         })
       })
       .catch(err => {
@@ -167,7 +163,7 @@ export default function AppFunctional(props) {
     <div id="wrapper" className={props.className}>
       <div className="info">
         <h3 id="coordinates">Coordinates ({state.x}, {state.y})</h3>
-        <h3 id="steps">You moved {state.steps} times</h3>
+        <h3 id="steps">You moved {state.steps} {state.steps === 1 ? 'time' : 'times'}</h3>
       </div>
       <div id="grid">
         {

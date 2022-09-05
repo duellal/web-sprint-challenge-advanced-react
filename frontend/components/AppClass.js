@@ -32,6 +32,7 @@ export default class AppClass extends React.Component {
         this.setState({
           ...this.state,
           message: res.data.message,
+          email: ''
         })
       })
       .catch(err => {
@@ -40,14 +41,6 @@ export default class AppClass extends React.Component {
           message: err.response.data.message,
         })
       })
-    this.setState({
-      index: 4,
-      x: 2,
-      y: 2,
-      steps: 0,
-      email: '',
-      matrix: [[null, null, null], [null, 'B', null], [null, null, null]]
-    })
   }
 
   onChangeEmail = (evt) => {
@@ -171,7 +164,7 @@ export default class AppClass extends React.Component {
       <div id="wrapper" className={this.props.className} >
         <div className="info">
           <h3 id="coordinates">Coordinates ({this.state.x}, {this.state.y})</h3>
-          <h3 id="steps">You moved {this.state.steps} times</h3>
+          <h3 id="steps">You moved {this.state.steps} {this.state.steps === 1 ? 'time' : 'times'}</h3>
         </div>
         <div id="grid">
           {
