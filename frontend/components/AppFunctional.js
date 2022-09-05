@@ -1,76 +1,195 @@
-import React from 'react'
+import React, { useState } from 'react'
+import axios from 'axios'
+
 
 // Suggested initial states
-const initialMessage = ''
-const initialEmail = ''
-const initialSteps = 0
-const initialIndex = 4 // the index the "B" is at
+const initialState = {
+  index: 4,
+  x: 2,
+  y: 2,
+  steps: 0,
+  message: '',
+  email: '',
+  matrix: [[null, null, null], [null, 'B', null], [null, null, null]]
+}
+
+const url = 'http://localhost:9000/api/result'
 
 export default function AppFunctional(props) {
-  // THE FOLLOWING HELPERS ARE JUST RECOMMENDATIONS.
-  // You can delete them and build your own logic from scratch.
+  const [state, setState] = useState(initialState)
 
-  function getXY() {
-    // It it not necessary to have a state to track the coordinates.
-    // It's enough to know what index the "B" is at, to be able to calculate them.
+  const postRequest = () => {
+    const newRequest = {
+      x: state.x,
+      y: state.y,
+      steps: state.steps,
+      email: state.email
+    }
+
+    axios
+      .post(url, newRequest)
+      .then(res => {
+        setState({
+          ...state,
+          message: res.data.message,
+          email: '',
+        })
+      })
+      .catch(err => {
+        setState({
+          ...state,
+          message: err.response.data.message
+        })
+      })
   }
 
-  function getXYMessage() {
-    // It it not necessary to have a state to track the "Coordinates (2, 2)" message for the user.
-    // You can use the `getXY` helper above to obtain the coordinates, and then `getXYMessage`
-    // returns the fully constructed string.
-  }
-
-  function reset() {
-    // Use this helper to reset all states to their initial values.
-  }
-
-  function getNextIndex(direction) {
-    // This helper takes a direction ("left", "up", etc) and calculates what the next index
-    // of the "B" would be. If the move is impossible because we are at the edge of the grid,
-    // this helper should return the current index unchanged.
-  }
-
-  function move(evt) {
-    // This event handler can use the helper above to obtain a new index for the "B",
-    // and change any states accordingly.
-  }
-
-  function onChange(evt) {
-    // You will need this to update the value of the input.
+  function onChangeEmail(evt) {
+    setState({
+      ...state, email: evt.target.value
+    })
   }
 
   function onSubmit(evt) {
-    // Use a POST request to send a payload to the server.
+    evt.preventDefault()
+    postRequest()
+  }
+
+  const moveLeft = () => {
+    if (state.x === 1) {
+      setState({
+        ...state,
+        message: "You can't go left"
+      })
+    }
+    else {
+      const newMatrix = [...state.matrix]
+      newMatrix[state.y - 1][state.x - 1] = null;
+      newMatrix[state.y - 1][state.x - 2] = 'B'
+
+      setState({
+        ...state,
+        x: state.x - 1,
+        index: state.index - 1,
+        steps: state.steps + 1,
+        matrix: newMatrix,
+        message: ''
+      })
+    }
+  }
+
+  const moveUp = () => {
+    if (state.y === 1) {
+      setState({
+        ...state,
+        message: "You can't go up"
+      })
+    }
+    else {
+      const newMatrix = [...state.matrix]
+      newMatrix[state.y - 1][state.x - 1] = null;
+      newMatrix[state.y - 2][state.x - 1] = 'B'
+
+      setState({
+        ...state,
+        y: state.y - 1,
+        index: state.index - 3,
+        steps: state.steps + 1,
+        matrix: newMatrix,
+        message: ''
+      })
+    }
+  }
+
+  const moveRight = () => {
+    if (state.x === 3) {
+      setState({
+        ...state,
+        message: "You can't go right"
+      })
+    }
+    else {
+      const newMatrix = [...state.matrix]
+      newMatrix[state.y - 1][state.x - 1] = null;
+      newMatrix[state.y - 1][state.x] = 'B'
+
+      setState({
+        ...state,
+        x: state.x + 1,
+        index: state.index + 1,
+        steps: state.steps + 1,
+        matrix: newMatrix,
+        message: ''
+      })
+    }
+  }
+
+  const moveDown = () => {
+    if (state.y === 3) {
+      setState({
+        ...state,
+        message: "You can't go down"
+      })
+    }
+    else {
+      const newMatrix = [...state.matrix]
+      newMatrix[state.y - 1][state.x - 1] = null;
+      newMatrix[state.y][state.x - 1] = 'B'
+
+      setState({
+        ...state,
+        y: state.y + 1,
+        index: state.index + 3,
+        steps: state.steps + 1,
+        matrix: newMatrix,
+        message: ''
+      })
+    }
+  }
+
+  const handleReset = () => {
+    //tried setState(initialState), but the matrix would not reset
+    setState({
+      index: 4,
+      x: 2,
+      y: 2,
+      steps: 0,
+      message: '',
+      email: '',
+      matrix: [[null, null, null], [null, 'B', null], [null, null, null]]
+    })
   }
 
   return (
     <div id="wrapper" className={props.className}>
       <div className="info">
-        <h3 id="coordinates">Coordinates (2, 2)</h3>
-        <h3 id="steps">You moved 0 times</h3>
+        <h3 id="coordinates">Coordinates ({state.x}, {state.y})</h3>
+        <h3 id="steps">You moved {state.steps} {state.steps === 1 ? 'time' : 'times'}</h3>
       </div>
       <div id="grid">
         {
           [0, 1, 2, 3, 4, 5, 6, 7, 8].map(idx => (
-            <div key={idx} className={`square${idx === 4 ? ' active' : ''}`}>
-              {idx === 4 ? 'B' : null}
+            <div key={idx} className={`square${idx === state.index ? ' active' : ''}`}>
+              {idx === state.index ? 'B' : null}
             </div>
           ))
         }
       </div>
       <div className="info">
-        <h3 id="message"></h3>
+        <h3 id="message">{state.message}</h3>
       </div>
       <div id="keypad">
-        <button id="left">LEFT</button>
-        <button id="up">UP</button>
-        <button id="right">RIGHT</button>
-        <button id="down">DOWN</button>
-        <button id="reset">reset</button>
+        <button id="left" onClick={moveLeft}>LEFT</button>
+        <button id="up" onClick={moveUp}>UP</button>
+        <button id="right" onClick={moveRight}>RIGHT</button>
+        <button id="down" onClick={moveDown}>DOWN</button>
+        <button id="reset" onClick={handleReset}>reset</button>
       </div>
-      <form>
-        <input id="email" type="email" placeholder="type email"></input>
+      <form onSubmit={onSubmit}>
+        <input id="email"
+          type="email"
+          placeholder="type email"
+          value={state.email}
+          onChange={onChangeEmail}></input>
         <input id="submit" type="submit"></input>
       </form>
     </div>
