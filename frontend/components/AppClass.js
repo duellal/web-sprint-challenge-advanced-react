@@ -45,7 +45,6 @@ export default class AppClass extends React.Component {
       x: 2,
       y: 2,
       steps: 0,
-      message: '',
       email: '',
       matrix: [[null, null, null], [null, 'B', null], [null, null, null]]
     })

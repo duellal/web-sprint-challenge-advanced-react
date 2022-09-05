@@ -30,16 +30,19 @@ export default function AppFunctional(props) {
       .post(url, newRequest)
       .then(res => {
         setState({
-          ...state,
           message: res.data.message,
-          email: ''
+          index: 4,
+          x: 2,
+          y: 2,
+          steps: 0,
+          email: '',
+          matrix: [[null, null, null], [null, 'B', null], [null, null, null]]
         })
       })
       .catch(err => {
         setState({
           ...state,
-          message: err.response.data.message,
-          email: ''
+          message: err.response.data.message
         })
       })
   }
@@ -72,7 +75,8 @@ export default function AppFunctional(props) {
         x: state.x - 1,
         index: state.index - 1,
         steps: state.steps + 1,
-        matrix: newMatrix
+        matrix: newMatrix,
+        message: ''
       })
     }
   }
@@ -94,7 +98,8 @@ export default function AppFunctional(props) {
         y: state.y - 1,
         index: state.index - 3,
         steps: state.steps + 1,
-        matrix: newMatrix
+        matrix: newMatrix,
+        message: ''
       })
     }
   }
@@ -116,7 +121,8 @@ export default function AppFunctional(props) {
         x: state.x + 1,
         index: state.index + 1,
         steps: state.steps + 1,
-        matrix: newMatrix
+        matrix: newMatrix,
+        message: ''
       })
     }
   }
@@ -138,7 +144,8 @@ export default function AppFunctional(props) {
         y: state.y + 1,
         index: state.index + 3,
         steps: state.steps + 1,
-        matrix: newMatrix
+        matrix: newMatrix,
+        message: ''
       })
     }
   }
