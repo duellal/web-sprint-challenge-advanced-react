@@ -1,14 +1,22 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import axios from 'axios'
+
 
 // Suggested initial states
-const initialMessage = ''
-const initialEmail = ''
-const initialSteps = 0
-const initialIndex = 4 // the index the "B" is at
+const initialState = {
+  index: 4,
+  x: 2,
+  y: 2,
+  steps: 0,
+  message: '',
+  email: '',
+  matrix: [[null, null, null], [null, "B", null], [null, null, null]]
+}
+
+const url = 'http://localhost:9000/api/result'
 
 export default function AppFunctional(props) {
-  // THE FOLLOWING HELPERS ARE JUST RECOMMENDATIONS.
-  // You can delete them and build your own logic from scratch.
+  const [state, setState] = useState(initialState)
 
   function getXY() {
     // It it not necessary to have a state to track the coordinates.
@@ -29,6 +37,7 @@ export default function AppFunctional(props) {
     // This helper takes a direction ("left", "up", etc) and calculates what the next index
     // of the "B" would be. If the move is impossible because we are at the edge of the grid,
     // this helper should return the current index unchanged.
+
   }
 
   function move(evt) {
@@ -36,12 +45,41 @@ export default function AppFunctional(props) {
     // and change any states accordingly.
   }
 
-  function onChange(evt) {
-    // You will need this to update the value of the input.
+  const postRequest = () => {
+    const newRequest = {
+      x: state.x,
+      y: state.y,
+      steps: state.steps,
+      email: state.email
+    }
+
+    axios
+      .post(url, newRequest)
+      .then(res => {
+        setState({
+          ...state,
+          message: res.data.message,
+          email: ''
+        })
+      })
+      .catch(err => {
+        setState({
+          ...state,
+          message: err.response.data.message,
+          email: ''
+        })
+      })
+  }
+
+  function onChangeEmail(evt) {
+    setState({
+      ...state, email: evt.target.value
+    })
   }
 
   function onSubmit(evt) {
-    // Use a POST request to send a payload to the server.
+    evt.preventDefault()
+    postRequest()
   }
 
   return (
@@ -60,7 +98,7 @@ export default function AppFunctional(props) {
         }
       </div>
       <div className="info">
-        <h3 id="message"></h3>
+        <h3 id="message">{state.message}</h3>
       </div>
       <div id="keypad">
         <button id="left">LEFT</button>
@@ -69,8 +107,12 @@ export default function AppFunctional(props) {
         <button id="down">DOWN</button>
         <button id="reset">reset</button>
       </div>
-      <form>
-        <input id="email" type="email" placeholder="type email"></input>
+      <form onSubmit={onSubmit}>
+        <input id="email"
+          type="email"
+          placeholder="type email"
+          value={state.email}
+          onChange={onChangeEmail}></input>
         <input id="submit" type="submit"></input>
       </form>
     </div>
