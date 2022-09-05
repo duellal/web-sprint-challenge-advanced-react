@@ -18,22 +18,41 @@ const url = 'http://localhost:9000/api/result'
 export default function AppFunctional(props) {
   const [state, setState] = useState(initialState)
 
-  function getXY() {
-    // It it not necessary to have a state to track the coordinates.
-    // It's enough to know what index the "B" is at, to be able to calculate them.
+  const postRequest = () => {
+    const newRequest = {
+      x: state.x,
+      y: state.y,
+      steps: state.steps,
+      email: state.email
+    }
+
+    axios
+      .post(url, newRequest)
+      .then(res => {
+        setState({
+          ...state,
+          message: res.data.message,
+          email: ''
+        })
+      })
+      .catch(err => {
+        setState({
+          ...state,
+          message: err.response.data.message,
+          email: ''
+        })
+      })
   }
 
-  function getXYMessage() {
-    // It it not necessary to have a state to track the "Coordinates (2, 2)" message for the user.
-    // You can use the `getXY` helper above to obtain the coordinates, and then `getXYMessage`
-    // returns the fully constructed string.
+  function onChangeEmail(evt) {
+    setState({
+      ...state, email: evt.target.value
+    })
   }
 
-  function getNextIndex(direction) {
-    // This helper takes a direction ("left", "up", etc) and calculates what the next index
-    // of the "B" would be. If the move is impossible because we are at the edge of the grid,
-    // this helper should return the current index unchanged.
-
+  function onSubmit(evt) {
+    evt.preventDefault()
+    postRequest()
   }
 
   const moveLeft = () => {
@@ -125,44 +144,16 @@ export default function AppFunctional(props) {
   }
 
   const handleReset = () => {
-    setState(initialState)
-  }
-
-  const postRequest = () => {
-    const newRequest = {
-      x: state.x,
-      y: state.y,
-      steps: state.steps,
-      email: state.email
-    }
-
-    axios
-      .post(url, newRequest)
-      .then(res => {
-        setState({
-          ...state,
-          message: res.data.message,
-          email: ''
-        })
-      })
-      .catch(err => {
-        setState({
-          ...state,
-          message: err.response.data.message,
-          email: ''
-        })
-      })
-  }
-
-  function onChangeEmail(evt) {
+    //tried setState(initialState), but the matrix would not reset
     setState({
-      ...state, email: evt.target.value
+      index: 4,
+      x: 2,
+      y: 2,
+      steps: 0,
+      message: '',
+      email: '',
+      matrix: [[null, null, null], [null, 'B', null], [null, null, null]]
     })
-  }
-
-  function onSubmit(evt) {
-    evt.preventDefault()
-    postRequest()
   }
 
   return (
